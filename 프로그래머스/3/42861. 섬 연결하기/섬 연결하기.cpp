@@ -13,7 +13,6 @@ typedef pair<ll,pii> pip;
 
 int parent[101];
 int N;
-vector<pii> g[101];
 priority_queue<pip,vector<pip>,greater<pip>> q;
 
 
@@ -36,8 +35,6 @@ int solution(int n, vector<vector<int>> costs) {
     
     for(int i=0;i<costs.size();i++){
         int u=costs[i][0], v=costs[i][1], w=costs[i][2];
-        g[u].push_back({v,w});
-        g[v].push_back({u,w});
         q.push({w,{u,v}});
     }
     
