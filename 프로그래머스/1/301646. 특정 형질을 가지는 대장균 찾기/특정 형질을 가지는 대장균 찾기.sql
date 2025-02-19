@@ -1,4 +1,4 @@
 -- 코드를 작성해주세요
-select count(ID) as COUNT
-from ECOLI_DATA
-where (((GENOTYPE%2)=1)or(floor(GENOTYPE/4)%2=1)) and (floor(GENOTYPE/2)%2!=1);
+select count(1) as COUNT
+from ECOLI_DATA a
+where ((GENOTYPE&1) or (GENOTYPE&4)) and !(GENOTYPE&2)
