@@ -1,8 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.*;
 
 
 public class Main {
@@ -11,7 +8,7 @@ public class Main {
     private static StringTokenizer st;
     private static int TC, N;
     private static int[] cnt, parent;
-    private static HashMap<String, Integer> map=new HashMap<>();
+    private static Map<String, Integer> map=new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         //System.setIn(new FileInputStream("input.txt"));
