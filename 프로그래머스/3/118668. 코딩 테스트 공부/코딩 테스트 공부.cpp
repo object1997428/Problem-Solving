@@ -1,86 +1,91 @@
 #include <string>
 #include <vector>
+#include <string.h>
 #include <algorithm>
+#include <iostream>
 #include <climits>
 #include <cassert>
 #include <cmath>
-#include <iostream>
-#include <string.h>
-#include <queue>
 using namespace std;
 typedef pair<int,int> pii;
-typedef pair<int,pii> pip;
-typedef long long int ll;
-#include <unordered_map>
+typedef long long ll;
 #define endl '\n'
 
-int my,mx;
-int N;
-int chked[181][181]; 
-vector<vector<int>> arr;
-priority_queue<pip,vector<pip>,greater<pip>> q;
+typedef struct node{
+    int needA,needB,plusA,plusB,cost;
+}node;
+vector<node> v;
+int comp(node v1,node v2){
+    int p1=(v1.plusA+v1.plusB)/v1.cost;
+    int p2=(v2.plusA+v2.plusB)/v2.cost;
+    if(v1.cost==v2.cost) return false;
+    return v1.cost>v2.cost;
+}
 
-int bfs(int sy,int sx,int st){
+
+int maxA,maxB,minA,minB;
+int M;
+int ans;
+int dp[1001][1001];
+
+int solve(int A,int B,int sum){
+    if(A>=maxA&&B>=maxB){
+        ans=min(ans,sum);
+        return 0;
+    }
+    // if(sum>=ans) return INT_MAX;
+    A=min(A,maxA);
+    B=min(B,maxB);
+    int& ret=dp[A][B];
+    if(ret!=-1) return ret;
     
-    q.push({st,{sy,sx}});
-    for(int i=0;i<=180;i++)for(int j=0;j<=180;j++) chked[i][j]=INT_MAX;
-    chked[sy][sx]=st;
-    
-    int ans=INT_MAX;
-    while(!q.empty()){
-        int y=q.top().second.first;
-        int x=q.top().second.second;
-        int t=q.top().first;
-        q.pop();
-        
-        if(y>=my&&x>=mx){
-            return t;
-        }
-        
-        y=min(y,my);
-        x=min(x,mx);
-        
-        if(t>chked[y][x]) continue;
-        
-        
-        //1.
-        int ny=y+1,nx=x,nt=t+1;
-         if(y<my&&nt<chked[ny][nx]){
-             q.push({nt,{ny,nx}});
-             chked[ny][nx]=nt;
-        }
-        //2.
-        ny=y,nx=x+1,nt=t+1;
-        if(x<mx&&nt<chked[ny][nx]){
-            q.push({nt,{ny,nx}});
-            chked[ny][nx]=nt;
-        }
-        //3.
-        for(int i=0;i<N;i++){
-            if(arr[i][0]<=y&&arr[i][1]<=x){
-                if(arr[i][4]>=arr[i][2]+arr[i][3]) continue;
-                ny=y+arr[i][2], nx=x+arr[i][3], nt=t+arr[i][4];
-                
-                if(nt<chked[ny][nx]&&nt<=300){
-                    q.push({nt,{ny,nx}});
-                    chked[ny][nx]=nt;
-                }
+    ret=INT_MAX;
+    for(int i=0;i<v.size();i++){
+        //풀 수 있으면
+        if(A>=v[i].needA&&B>=v[i].needB){
+            //필요하면
+            if((maxA-A>0&&v[i].plusA>0)||(maxB-B>0&&v[i].plusB>0)){
+                ret=min(ret,solve(A+v[i].plusA,B+v[i].plusB, sum+v[i].cost)+v[i].cost);
+                // cout<<"A+v[i].plusA: "<<A+v[i].plusA<<" B+v[i].plusB: "<<B+v[i].plusB<<" ret: "<<ret<<endl;
             }
         }
     }
-    
-    return ans;
-}
-
-int solution(int alp, int cop, vector<vector<int>> problems) {
-    arr=problems;
-    N=arr.size();
-    my=0,mx=0;
-    for(int i=0;i<N;i++){
-        my=max(my,arr[i][0]);
-        mx=max(mx,arr[i][1]);
+    if(maxA-A>0){
+        ret=min(ret,solve(A+1,B,sum+1)+1);
+    } 
+    if(maxB-B>0){
+        ret=min(ret,solve(A,B+1,sum+1)+1);
     }
     
-    int ret=bfs(alp,cop,0);
     return ret;
+}
+
+
+int solution(int alp, int cop, vector<vector<int>> problems) {
+    
+    M=problems.size();
+    ans=INT_MAX;
+    memset(dp,-1,sizeof(dp));
+    for(int i=0;i<M;i++){
+        maxA=max(maxA,problems[i][0]);
+        maxB=max(maxB,problems[i][1]);
+        minA=min(minA,problems[i][0]);
+        minB=min(minB,problems[i][1]);
+        int plusA=problems[i][2];
+        int plusB=problems[i][3];
+        int cost=problems[i][4];
+        
+        if(plusA==0&&plusB==0) continue; //아무것도 plus못하면 넣지X
+        v.push_back({problems[i][0], problems[i][1], plusA, plusB, cost});
+    }
+    // sort(v.begin(),v.end(),comp);
+    // for(int i=0;i<v.size();i++){
+    //     cout<<"plusA: "<<v[i].plusA<<" plusB: "<<v[i].plusB<<endl;
+    // }
+    
+    int ret=solve(alp,cop,0);
+    
+    
+    int answer = ret;
+    return answer;
 }
