@@ -8,96 +8,136 @@
 #include <cmath>
 using namespace std;
 typedef pair<int,int> pii;
+typedef long long ll;
 
-int arr[102][102][2];
 int N;
+int g[1001][1001],b[1001][1001];
 
-bool possible_create(int sy,int sx,int t){
-    if(sy<0||sx<0||sy>N||sx>N) return true;
+bool check(int y,int x,int type){
     
-    if(t==0){//기둥
-        if(sy==0) return true;
-        else if((sx-1>=0&&arr[sy][sx-1][1])||arr[sy][sx][1]) return true;
-        else if(sy-1>=0&&arr[sy-1][sx][0]) return true;
-    }
-    else{
-        if(sy==1&&sx==2){
-            cout<<arr[sy-1][sx][0]<<" "<<arr[sy-1][sx+1][0]<<" "<<arr[sy][sx-1][1]<<" "<<arr[sy][sx+1][1]<<endl;
+    if(type==0){//기둥
+        if(y==0) return true;
+        else if(b[y][x]==1) return true;
+        else if(x-1>=0&&b[y][x-1]==1) return true;
+        else if(y-1>=0&&g[y-1][x]==1) return true;
+        else {
+            // cout<<"실패-- type: "<<type<<" y: "<<y<<" x: "<<x<<endl;
+            return false;
         }
-        if((sy-1>=0&&arr[sy-1][sx][0])||(sy-1>=0&&arr[sy-1][sx+1][0])) return true;
-        else if((sx-1>=0&&arr[sy][sx-1][1])&&(sx+1<=N&&arr[sy][sx+1][1])) return true;
     }
+    else{//보
+        if(y-1>=0&&g[y-1][x]==1) return true;
+        if(y-1>=0&&g[y-1][x+1]==1) return true;
+        else if(x-1>=0&&x+1<N&&b[y][x-1]==1&&b[y][x+1]==1) return true;
+        else{
+            // cout<<"실패-- type: "<<type<<" y: "<<y<<" x: "<<x<<endl;
+            return false;
+        } 
+    }
+    // cout<<"check: 없는 케이스 발견"<<endl;
     return false;
 }
 
-bool possible_erase(int sy,int sx,int t){
-    if(sy<0||sx<0||sy>N||sx>N) return true;
-    if(arr[sy][sx][t]==0) return true;
-    
-    if(t==0){//기둥
-        if(sy==0) return true;
-        else if((sx-1>=0&&arr[sy][sx-1][1])||arr[sy][sx][1]) return true;
-        else if(sy-1>=0&&arr[sy-1][sx][0]) return true;
+void plusType(int y,int x,int type){
+    if(!check(y,x,type)) return;
+    if(type==0) {
+        g[y][x]=1; //기둥
+        // cout<<"plus 성공-- type: "<<type<<" y: "<<y<<" x: "<<x<<endl;
+        // cout<<"g[y][x]: "<<g[y][x]<<endl;
     }
-    else{
-        if(sy==1&&sx==2){
-            cout<<arr[sy-1][sx][0]<<" "<<arr[sy-1][sx+1][0]<<" "<<arr[sy][sx-1][1]<<" "<<arr[sy][sx+1][1]<<endl;
+    else {
+        b[y][x]=1; //보
+        // cout<<"plus 성공-- type: "<<type<<" y: "<<y<<" x: "<<x<<endl;
+        // cout<<"b[y][x]: "<<b[y][x]<<endl;
+    }
+}
+
+void minusType(int y,int x,int type){
+    if(type==0){//기둥
+        g[y][x]=0;
+        
+        if(y+1<N&&g[y+1][x]==1&&check(y+1,x,0)==0) {
+            g[y][x]=1;
+            return;
         }
-        if((sy-1>=0&&arr[sy-1][sx][0])||(sy-1>=0&&arr[sy-1][sx+1][0])) return true;
-        else if((sx-1>=0&&arr[sy][sx-1][1])&&(sx+1<=N&&arr[sy][sx+1][1])) return true;
+        if(y+1<N&&b[y+1][x]==1&&check(y+1,x,1)==0){
+            g[y][x]=1;
+            return;
+        }
+        if(y+1<N&&x-1>=0&&b[y+1][x-1]==1&&check(y+1,x-1,1)==0){
+            g[y][x]=1;
+            return;
+        }
+        if(b[y][x]==1&&check(y,x,1)==0){
+            g[y][x]=1;
+            return;
+        }
+        if(x-1>=0&&b[y][x-1]==1&&check(y,x-1,1)==0){
+            g[y][x]=1;
+            return;
+        }
+        if(y-1>=0&&g[y-1][x]==1&&check(y-1,x,0)==0){
+            g[y][x]=1;
+            return;
+        }
+        // cout<<"minus 성공-- type: "<<type<<" y: "<<y<<" x: "<<x<<endl;
+        // g[y][x]=0;
     }
-    return false;
+    else{//보
+        b[y][x]=0;
+        
+        if(g[y][x]==1&&check(y,x,0)==0){
+            b[y][x]=1;
+            return;
+        }
+        if(x+1<N&&g[y][x+1]==1&&check(y,x+1,0)==0){
+            b[y][x]=1;
+            return;
+        }
+        if(x-1>=0&&b[y][x-1]==1&&check(y,x-1,1)==0){
+            b[y][x]=1;
+            return;
+        }
+        // cout<<"b[y][x+1]: "<<b[y][x+1]<<endl;
+        if(x+1<N&&b[y][x+1]==1&&check(y,x+1,1)==0){
+            b[y][x]=1;
+            return;
+        }
+        if(y-1>=0&&g[y-1][x]==1&&check(y-1,x,0)==0) {
+            b[y][x]=1;
+            return;
+        }
+        if(x+1<N&&y-1>=0&&g[y-1][x+1]==1&&check(y-1,x+1,0)==0) {
+            b[y][x]=1;
+            return;
+        }
+        // cout<<"minus 성공-- type: "<<type<<" y: "<<y<<" x: "<<x<<endl;
+        // b[y][x]=0;
+    } 
 }
 
 vector<vector<int>> solution(int n, vector<vector<int>> build_frame) {
     N=n;
-    for(auto inp:build_frame){
-        int sy=inp[1], sx=inp[0], t=inp[2], o=inp[3];
-        cout<<"sy: "<<sy<<" sx: "<<sx<<" t: "<<t<<" o: "<<o<<endl;
-        if(o==1){
-            if(possible_create(sy,sx,t)){
-                arr[sy][sx][t]=o;
-                cout<<"possible- sy: "<<sy<<" sx: "<<sx<<" t: "<<t<<endl;
-            } 
+    for(auto o:build_frame){
+        int y=o[1];
+        int x=o[0];
+        int type=o[2], isPlus=o[3];
+        // cout<<"y: "<<y<<" x: "<<x<<" type: "<<type<<" isPlus: "<<isPlus<<endl;
+        if(isPlus){//설치
+            plusType(y,x,type);
         }
-        else{
-            arr[sy][sx][t]=0;
-            if(t==0){
-                if(possible_erase(sy+1,sx,0)
-               &&possible_erase(sy+1,sx-1,1)&&possible_erase(sy+1,sx,1)
-              &&possible_erase(sy,sx-1,1)&&possible_erase(sy,sx,1)
-              &&possible_erase(sy-1,sx,0)){
-                arr[sy][sx][t]=o;
-                cout<<"possible- sy: "<<sy<<" sx: "<<sx<<" t: "<<t<<endl;
-                }
-                else arr[sy][sx][t]=1;
-            }
-            else{//보
-                if(possible_erase(sy,sx,0)&&possible_erase(sy,sx+1,0)
-                   &&possible_erase(sy,sx-1,1)&&possible_erase(sy,sx+1,1)
-                    &&possible_erase(sy-1,sx,1)&&possible_erase(sy-1,sx+1,1)){
-                        arr[sy][sx][t]=0;
-                        cout<<"possible- sy: "<<sy<<" sx: "<<sx<<" t: "<<t<<endl;
-                    }
-                else arr[sy][sx][t]=1;
-            }
+        else{//삭제
+            minusType(y,x,type);
         }
-        
     }
+    
     
     vector<vector<int>> answer;
-    for(int j=0;j<=N;j++)for(int i=0;i<=N;i++){
-        if(arr[i][j][0]){
-            vector<int> tmp={j,i,0};
-            answer.push_back(tmp);
-        } 
-        if(arr[i][j][1]){
-            vector<int> tmp={j,i,1};
-            answer.push_back(tmp);
-        } 
+    for(int i=0;i<1001;i++){
+        for(int j=0;j<1001;j++){
+            if(g[j][i]==1) answer.push_back({i,j,0});
+            if(b[j][i]==1) answer.push_back({i,j,1});
+        }
     }
-    
-    
-    
     return answer;
 }
