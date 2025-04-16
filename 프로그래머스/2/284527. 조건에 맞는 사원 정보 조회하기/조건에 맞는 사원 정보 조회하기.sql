@@ -1,10 +1,32 @@
-select `sums` SCORE, a.EMP_NO, a.EMP_NAME, a.POSITION, a.EMAIL
+
+
+select mSCORE as SCORE, a.EMP_NO, EMP_NAME, POSITION, EMAIL
 from HR_EMPLOYEES a
-join(
-    select sum(SCORE) as `sums`, EMP_NO
-    from HR_GRADE b
-    where year='2022'
-    group by EMP_NO
-    order by `sums` desc
-    limit 1
-) as b on a.EMP_NO=b.EMP_NO;
+join (
+    select aa.EMP_NO, mSCORE
+    from (
+        select EMP_NO, sum(SCORE) as sSCORE
+        from HR_GRADE
+        where YEAR = 2022
+        group by EMP_NO
+    ) as aa,
+    (
+        select max(sSCORE) as mSCORE
+        from (
+            select EMP_NO, sum(SCORE) as sSCORE
+            from HR_GRADE
+            where YEAR = 2022
+            group by EMP_NO
+        ) as b
+    ) as bb
+    where aa.sSCORE=bb.mSCORE
+) cc on cc.EMP_NO=a.EMP_NO
+
+
+
+
+
+# select EMP_NO, sum(SCORE) as sSCORE
+# from HR_GRADE
+# where YEAR
+# group by EMP_NO
