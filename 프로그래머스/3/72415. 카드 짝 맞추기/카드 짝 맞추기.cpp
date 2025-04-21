@@ -1,54 +1,58 @@
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <string.h>
-#include <climits>
 #include <iostream>
 #include <cmath>
 #include <cassert>
+#include <climits>
+#include <string.h>
 #include <queue>
-#define endl '\n'
+#include <algorithm>
 using namespace std;
-typedef pair<int,int> pii;
 typedef long long int ll;
+typedef pair<int,int> pii;
 
-vector<pii> card[9];
-vector<int> character;
-vector<vector<int>> arr;
+int arr[4][4];
 
+int M;
+vector<int> v;
 vector<int> cardOrder;
-int sy,sx,ans;
+pii card[9][2];
+
 queue<pii> q;
-int chk[5][5];
+int visited[4][4];
 int way[4][2]={{-1,0},{0,1},{1,0},{0,-1}};
 
 vector<int> wv;
-pii moveCtrl(int y,int x,int w){
-    //ctrl+동서남북
-    int ny=y,nx=x;
-    int canMove=1;
+int ans=INT_MAX;
+
+pii goCtrl(int y,int x,int w){
+    int canGo=1;
+    int ny=y, nx=x;
     for(int i=0;i<4;i++){
         ny+=way[w][0], nx+=way[w][1];
-        if(ny<0||nx<0||ny>=4||nx>=4){
-            if(i==0) {canMove=0; return {-1,-1};}
-            else { ny-=way[w][0], nx-=way[w][1]; return {ny,nx};}
+        if(ny>=0&&nx>=0&&ny<4&&nx<4){
+            if(arr[ny][nx]>0){
+                return {ny,nx};
+            }
         }
-        else if(arr[ny][nx]>0) return {ny,nx};
+        else{//벽
+            if(i==0){ return {-1,-1}; }
+            else{
+                ny-=way[w][0], nx-=way[w][1];
+                return {ny,nx};
+            }
+        }
     }
     return {-1,-1};
 }
 
-
 int getMindist(int sy,int sx,int ey,int ex){
-    //두 카드를 최단거리로 가고, 최단거리 반환
-    wv.clear();
-    memset(chk,0,sizeof(chk));
+    memset(visited,0,sizeof(visited));
     while(!q.empty()) q.pop();
-    
     q.push({sy,sx});
-    chk[sy][sx]=1;
+    visited[sy][sx]=1;
     
-    
+    wv.clear();
     if(sy<ey) wv.push_back(2);
     else if(sy>ey) wv.push_back(0);
     if(sx<ex) wv.push_back(1);
@@ -59,95 +63,109 @@ int getMindist(int sy,int sx,int ey,int ex){
         int x=q.front().second;
         q.pop();
         
-        if(y==ey&&x==ex) return chk[y][x]-1;
+        if(y==ey&&x==ex) return visited[y][x]-1;
         
-        for(int w:wv){
-            //그냥 가기
-            int ny=y+way[w][0],nx=x+way[w][1];
-            if(ny>=0&&nx>=0&&ny<4&&nx<4&&chk[ny][nx]==0){
-                chk[ny][nx]=chk[y][x]+1;
-                q.push({ny,nx});
+        for(int k=0;k<wv.size();k++){
+            int w=wv[k];
+            //Ctrl
+            pii ret=goCtrl(y,x,w);
+            int ny=ret.first,nx=ret.second;
+            if(ret.first!=-1){
+                if(visited[ny][nx]==0){
+                    visited[ny][nx]=visited[y][x]+1;
+                    q.push({ny,nx});
+                }
             }
             
-            //ctrl+w
-            pii ret=moveCtrl(y,x,w);
-            ny=ret.first,nx=ret.second;
-            if(ny>=0&&nx>=0&&ny<4&&nx<4&&chk[ny][nx]==0){
-                chk[ny][nx]=chk[y][x]+1;
-                q.push({ny,nx});
+            //그냥
+            ny=y+way[w][0], nx=x+way[w][1];
+            if(ny>=0&&nx>=0&&ny<4&&nx<4){
+                if(visited[ny][nx]==0){
+                    visited[ny][nx]=visited[y][x]+1;
+                    q.push({ny,nx});
+                }
             }
         }
     }
-    
     return -1;
 }
 
-int simulate(){
-    int cy=sy,cx=sx;
-    int sum=0;
-    for(int i=0;i<character.size();i++){
-        int num=character[i];
-        pii card1=card[num][0];
-        pii card2=card[num][1];
-        if(cardOrder[num-1]!=0) swap(card1,card2);
-        
-        int cursor_card1=getMindist(cy,cx,card1.first,card1.second);
-        int card1_card2=getMindist(card1.first,card1.second,card2.first,card2.second);
-        sum+=cursor_card1+card1_card2+2;
-        
-        arr[card1.first][card1.second]=0;
-        arr[card2.first][card2.second]=0;
-        
-        cy=card2.first, cx=card2.second;
-        
-        if(ans<sum) break;
-    }
-    
-    
-     for(int i=0;i<character.size();i++){
-        int num=character[i];
-        pii card1=card[num][0];
-        pii card2=card[num][1];
-        arr[card1.first][card1.second]=num;
-        arr[card2.first][card2.second]=num;
-     }
-    
-    return sum;
-}
+//정해진 캐릭터, 정해진 카드 순서대로 최단 거리 구하기
+int solve(int cy,int cx){
+    int ret=0;
 
-void pick(int cnt){
-    if(cnt==character.size()){
+    
+    for(int i=0;i<M;i++){
+        int c=v[i];
+        int start=cardOrder[i];
+        // cout<<"c: "<<c<<endl;
+
+        pii src=card[c][start];
+        pii dst=card[c][(start==0)?1:0];
         
-        int ret=simulate();
-        // cout<<"ret: "<<ret<<endl;
-        ans=min(ans,ret);
-        return;
+        ret+=getMindist(cy,cx,src.first,src.second);
+        ret+=getMindist(src.first,src.second,dst.first,dst.second);
+        ret+=2;
+        
+        arr[src.first][src.second]=0;
+        arr[dst.first][dst.second]=0;
+        cy=dst.first; cx=dst.second;
+        
+        if(ans<ret) break;
     }
-    for(int i=0;i<=1;i++){
-        cardOrder.push_back(i);
-        pick(cnt+1);
-        cardOrder.pop_back();
+    
+    for(int i=0;i<M;i++){
+        int c=v[i];
+        int start=cardOrder[i];
+        pii src=card[c][start];
+        pii dst=card[c][(start==0)?1:0];
+        
+        arr[src.first][src.second]=c;
+        arr[dst.first][dst.second]=c;
     }
+    
+    return ret;
 }
 
 int solution(vector<vector<int>> board, int r, int c) {
     //init
-    arr=board;
-    ans=INT_MAX; sy=r, sx=c;
+    for(int i=0;i<4;i++)for(int j=0;j<4;j++) arr[i][j]=board[i][j];
+    memset(card,-1,sizeof(card));
+    
     for(int i=0;i<4;i++)for(int j=0;j<4;j++){
-        if(arr[i][j]>0){
-            int num=arr[i][j];
-            if(card[num].empty()) character.push_back(num);
-            card[num].push_back({i,j});
+        int c=board[i][j];
+        if(c>0){
+            if(card[c][0].first==-1){
+                card[c][0]={i,j};
+                v.push_back(c);
+            }
+             else card[c][1]={i,j};
         }
     }
     
     //solve
-    sort(character.begin(),character.end());
+    //캐릭터 순서 정하기
+    sort(v.begin(),v.end());
+    cardOrder.resize(v.size(),0);
+    M=v.size();
+    
     do{
-        pick(0);
+        //캐릭터당 카드 순서 정하기
+        for(int i=M-1;i>=0;i--) cardOrder[i]=0; //0으로 초기화
         
-    }while(next_permutation(character.begin(),character.end()));
+        int ret=solve(r,c);
+        ans=min(ans,ret);
+        for(int i=M-1;i>=0;i--){
+            //00...001
+            //00...011 이렇게 채우고, 순열시키기
+            cardOrder[i]=1;
+            do{
+                ret=solve(r,c);
+                ans=min(ans,ret);
+            }while(next_permutation(cardOrder.begin(),cardOrder.end()));
+        }
+    }while(next_permutation(v.begin(),v.end()));
+    
     
     int answer = ans;
     return answer;
