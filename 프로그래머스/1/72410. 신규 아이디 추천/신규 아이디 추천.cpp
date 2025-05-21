@@ -1,63 +1,59 @@
 #include <string>
 #include <vector>
 #include <string.h>
-#include <iostream>
+#include <algorithm>
 #include <climits>
 #include <cassert>
 #include <cmath>
-#include <algorithm>
+#include <queue>
+#include <iostream>
 using namespace std;
-typedef pair<int,int> pii;
 typedef long long ll;
-#define endl '\n'
+typedef pair<int,int> pii;
+
+
 
 string solution(string str) {
-    //1. 대->소
-    for(int i=str.size()-1;i>=0;i--){
-        char c=str[i];
-        if(c>='A'&&c<='Z'){
-            // cout<<"c: "<<c<<endl;
-            str[i]=c-'A'+'a';
-        }
+    //1. 
+    for(int i=0;i<str.size();i++){
+        if(str[i]>='A'&&str[i]<='Z') str[i]=str[i]-'A'+'a';
     }
-    //2. 규칙에 안맞는 문자 지우기
+    //2.
     for(int i=str.size()-1;i>=0;i--){
-        char c=str[i];
-        if((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'||c=='-'||c=='.'){}
+        if((str[i]>='a'&&str[i]<='z')||(str[i]>='0'&&str[i]<='9')||str[i]=='-'||str[i]=='_'||str[i]=='.'){}
         else{
-            // cout<<"c: "<<c<<endl;
-            // cout<<"전 str: "<<str<<endl;
+            // cout<<"str: "<<str<<" str[i]: "<<str[i]<<endl;
             str.erase(str.begin()+i);
-            // cout<<"후 str: "<<str<<endl;
+            // cout<<"str: "<<str<<endl;
         }
     }
-    //3. .가 2번 이상 연속이면 하나의 .로 치환
-    for(int i=str.size()-2;i>=0;i--){
-        char c=str[i];
-        if(c=='.'&&str[i+1]=='.'){
-            // cout<<"전 str: "<<str<<endl;
+    //3.
+    for(int i=str.size()-1;i>=1;i--){
+        if(str[i]=='.'&&str[i-1]==str[i]){
+            // cout<<"str: "<<str<<" str[i]: "<<str[i]<<endl;
             str.erase(str.begin()+i);
-            // cout<<"후 str: "<<str<<endl;
+            // cout<<"str: "<<str<<endl;
         }
     }
-    //4. 처음이나 끝에 .있으면 제거
-    // cout<<"전 str: "<<str<<endl;
+    //4. 
+    if(!str.empty()&&str[0]=='.') str.erase(str.begin());
     if(!str.empty()&&str.back()=='.') str.pop_back();
-    if(!str.empty()&&str[0]=='.') str=str.substr(1);
-    // cout<<"후 str: "<<str<<endl;
     
-    //5. 빈문자열이면 'a'
-    if(str.empty()) str="a";
-    // cout<<"후 str: "<<str<<endl;
+    //5.
+    if(str.size()==0) str="a";
     
-    //6. 16글자 이상이면 자르기
-    if(str.size()>=16) str=str.substr(0,15);
-    if(!str.empty()&&str.back()=='.') str.pop_back();
-    if(!str.empty()&&str[0]=='.') str=str.substr(1);
-    // cout<<"후 str: "<<str<<endl;
+    //6.
+    if(str.size()>=16){
+        str=str.substr(0,15);
+        if(str.back()=='.') str.pop_back();
+        // cout<<"str.size(): "<<str.size()<<endl;
+    }
     
-    //7.2글자 이하면 3배
-    while(str.size()<=2) str.push_back(str.back());
+    //7.
+    while(str.size()<=2){
+        str.push_back(str.back());
+    }
+    
     
     string answer = str;
     return answer;
