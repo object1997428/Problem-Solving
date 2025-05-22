@@ -3,81 +3,77 @@
 #include <string.h>
 #include <iostream>
 #include <climits>
-#include <cassert>
 #include <cmath>
+#include <cassert>
 #include <algorithm>
-#include <map>
+#include <unordered_map>
 using namespace std;
 typedef pair<int,int> pii;
+typedef pair<int,string> pis;
 typedef long long ll;
-typedef pair<int,string> ps;
-#define endl '\n'
 
+int arr[11]; //arr[3]=1 이면, 조합이 3개일때 pick
+int maxSize;
+string picked;
+unordered_map<string,int> m1;
+vector<string> v;
+string maxStr[11];
 
-// vector<string> v;
-string v;
-int chked[27];
-int maxCnt;
-int chkCnt[11];//pick해야하는 cnt
-
-map<string,int> m1;
-string cur;
-vector<ps> v1;
-
-void solve(int cnt,int start){
+void pick(string str, int cnt, int start){
     
-    // if(cnt==0) cout<<"v: "<<v<<endl;
-    //부분집합 완성
-    if(chkCnt[cnt]){
-        m1[cur]=m1[cur]+1;
-    }
-    if(cnt>=maxCnt) return;
-    
-    for(int i=start;i<v.size();i++){
-        char next=v[i];
-        if(chked[next-'A']==0){
-            chked[next-'A']=1;
-            cur.push_back(next);
-            solve(cnt+1,i+1);
-            cur.pop_back();
-            chked[next-'A']=0;
+    // cout<<"picked.size():  "<<picked.size()<<" arr[picked.size()]: "<<arr[picked.size()]<<endl;
+    if(arr[picked.size()]==1){
+        if(++m1[picked]==2){
+            v.push_back(picked);
         }
+        // return;
+    }
+    if(picked.size()==maxSize) return;
+    
+    for(int i=start;i<str.size();i++){
+        picked.push_back(str[i]);
+        pick(str,cnt+1,i+1);
+        picked.pop_back();
     }
 }
 
 vector<string> solution(vector<string> orders, vector<int> course) {
-    
-    for(int x:course){
-        chkCnt[x]=1;
-        maxCnt=max(maxCnt,x);
-    }
-    int N=orders.size();
-    for(int i=0;i<N;i++){
-        sort(orders[i].begin(),orders[i].end());
-        v=orders[i];
-        solve(0,0);
+    for(auto c:course){
+        arr[c]=1;
+        // cout<<"c: "<<c<<" arr[c]: "<<arr[c]<<endl;
+        maxSize=max(maxSize,c);
+        // cout<<"maxSize: "<<maxSize<<endl;
     }
     
-    //result
-    int limit[11]={};
-    for(auto it=m1.begin();it!=m1.end();it++){
-        // cout<<it->first<<" "<<it->second<<endl;
-        // v1.push_back({it->second,it->first});
-        int sz=(it->first).size();
-        limit[sz]=max(limit[sz],it->second);
-        // if(it->first=="AC") cout<<"limit[sz]: "<<limit[sz]<<" it->second: "<<it->second<<endl;
+    
+    for(auto str: orders){
+        sort(str.begin(),str.end());
+        pick(str,0,0);
     }
-    vector<string> answer;
-    for(auto it=m1.begin();it!=m1.end();it++){
-        int sz=(it->first).size();
-        if(limit[sz]>=2&&limit[sz]==it->second){
-            // cout<<"limit[sz]: "<<limit[sz]<<endl;
-            answer.push_back(it->first);
+    
+    
+    sort(v.begin(),v.end());
+    vector<string> ans;
+    vector<pis> vv;
+    
+    for(int i=0;i<v.size();i++){
+        string str=v[i];
+        int cnt=m1[str];
+        vv.push_back({cnt,str});
+    }
+    sort(vv.begin(),vv.end(),greater<>());
+    for(int i=0;i<vv.size();i++){
+        string str=vv[i].second;
+        int cnt=vv[i].first;
+        int sz=str.size();
+        // cout<<"str: "<<str<<" cnt: "<<cnt<<" sz: "<<sz<<endl;
+        if(maxStr[sz]==""||m1[maxStr[sz]]==cnt){
+            maxStr[sz]=str;
+            ans.push_back(str);
         }
     }
     
     
-    sort(answer.begin(),answer.end());
-    
-    return answer;
+    sort(ans.begin(),ans.end());
+    return ans;
 }
