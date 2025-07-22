@@ -1,85 +1,72 @@
 #include <string>
 #include <vector>
-#include <iostream>
 #include <string.h>
-#include <algorithm>
-#include <climits>
+#include <iostream>
+#include <vector>
 #include <cmath>
 #include <cassert>
+#include <climits>
 #include <unordered_map>
 using namespace std;
-typedef pair<int,int> pii;
 typedef long long ll;
+typedef pair<int,int> pii;
+
+int ans;
 int N,M;
 vector<vector<string>> relation;
 vector<int> v;
 unordered_map<string,int> m1;
 
-
-int ans;
-
-//유일성 체크
-bool check(){
-    //유일성 체크
+bool validate(){
+    
+    
+    //유일성
     m1.clear();
-    // cout<<" 유일성 체크: "<<endl;
     for(int i=0;i<N;i++){
-        //각 행마다, v의 row값들 중복있느지 체크
-        string str="";
+        string sum="";
         for(int j=0;j<v.size();j++){
-            int r=v[j];
-            str+=relation[i][r];
+            sum+=relation[i][v[j]];
         }
-        // cout<<"str: "<<str<<endl;
-        if(m1[str]!=0) return false;
-        m1[str]=1;
+        if(++m1[sum]>1) return false;
     }
+    // cout<<"통과1"<<endl;
     
-    if(v.size()==1) return true;
-    
-    //최소성 체크
+    //최소성
     for(int k=0;k<v.size();k++){
-        //k가 빠져도 유일성 만족하면 false
+        //v[k] 빠지면 중복되어야함. 유일하면 안됨
         m1.clear();
-        // cout<<" 최소성 체크-- k: "<<k<<endl;
-        int flag=0;//중복아님
+        
+        int flag=0;
         for(int i=0;i<N;i++){
-            //각 행마다, v의 row값들 중복있느지 체크
-            string str="";
+            string sum="";
             for(int j=0;j<v.size();j++){
-                if(j==k) continue;
-                int r=v[j];
-                str+=relation[i][r];
+                if(k==j) continue;
+                sum+=relation[i][v[j]];
             }
-            // cout<<"str: "<<str<<endl;
-            if(m1[str]!=0){
-                flag=1; break; //중복 맞음
-            }
-            m1[str]=1;
+            //중복됨
+            if(++m1[sum]>1) {flag=1; break;}
         }
-        //하나가 빠졌는데도 중복이 아니면 최소성X: false
-        if(flag==0){
-            return false;
-        }
+        // cout<<"통과2-"<<k<<
+        //중복되지않으면 최소성X
+        if(flag==0) return false;
     }
     
     return true;
 }
 
-void pick(int cnt,int start,int end){
-    if(cnt==end){
-        //후보키 체크
-        if(check()){
-            // cout<<" 후보키 ok!: ";
+void pick(int cnt,int start){
+    if(cnt>=1){
+        if(validate()){
+            // cout<<"통과: ";
             // for(int i=0;i<v.size();i++) cout<<v[i]<<" "; cout<<endl;
             ans++;
+            return;
         }
-        return;
     }
     
-    for(int i=start;i<M;i++){
+    for(int i=start; i<M;i++){
         v.push_back(i);
-        pick(cnt+1,i+1,end);
+        pick(cnt+1, i+1);
         v.pop_back();
     }
 }
@@ -88,9 +75,7 @@ int solution(vector<vector<string>> _relation) {
     relation=_relation;
     N=relation.size(), M=relation[0].size();
     
-    for(int i=1;i<=M;i++){
-        pick(0,0,i);
-    }
+    pick(0,0);
     
     
     int answer = ans;
