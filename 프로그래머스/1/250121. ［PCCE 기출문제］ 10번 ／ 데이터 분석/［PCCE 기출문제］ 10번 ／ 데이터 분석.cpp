@@ -12,6 +12,11 @@ typedef pair<int,int> pii;
 typedef long long ll;
 
 vector<pii> v;
+int Q;
+
+bool cmp(vector<int>& v1, vector<int>& v2){
+    return v1[Q]<v2[Q];
+}
 
 int setK(string ext){
     if(ext=="code") return 0;
@@ -23,22 +28,17 @@ int setK(string ext){
 vector<vector<int>> solution(vector<vector<int>> data, string ext, int val_ext, string sort_by) {
     int N=data.size(), M=data[0].size();
     int P=setK(ext);
-    int Q=setK(sort_by);
+    Q=setK(sort_by);
     
-
-    for(int i=0;i<N;i++){
-        v.push_back({data[i][Q],i});
-    }
-    sort(v.begin(),v.end());
     
     vector<vector<int>> answer;
     for(int i=0;i<N;i++){
-        int idx=v[i].second;
-        int x=data[idx][P];
+        int x=data[i][P];
         if(x<val_ext){
-            answer.push_back(data[idx]);
+            answer.push_back(data[i]);
         }
     }
+    sort(answer.begin(),answer.end(),cmp);
     
     return answer;
 }
