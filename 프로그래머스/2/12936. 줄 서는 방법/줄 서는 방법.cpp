@@ -32,7 +32,8 @@ void solve(int cnt, ll k){
         if(chked[i]==1) continue;
         
         ll plus=fac[N-cnt-1];
-        if(k>1&&k>plus) {
+        if(cnt==N-1) plus=1;
+        if(k>plus) {
             k-=plus; continue;
         }
         else{
