@@ -11,36 +11,35 @@ typedef pair<int,int> pii;
 typedef long long ll;
 #define endl '\n'
 
-int ans,N,M;
 int dp[1001][1001];
+int N,M;
 
-int solution(vector<vector<int>> board) //arr[i][j]=i,j가 만들수 있는 최대 정각사각형 길이
+int solution(vector<vector<int>> board)
 {
-    int answer = 0;
-
-    const int height = board.size(), width = board[0].size();
-
-    for (int i = 0; i < width; ++i)
-    {
-        answer = std::max(answer, board[0][i]);
-    }
-
-    for (int i = 0; i < height; ++i)
-    {
-        answer = std::max(answer, board[i][0]);
-    }
-
-    for (int i = 1; i < height; ++i)
-    {
-        for (int j = 1; j < width; ++j)
-        {
-            if (board[i][j])
-            {
-                board[i][j] += std::min(board[i - 1][j], std::min(board[i][j - 1], board[i - 1][j - 1]));
-                answer = std::max(answer, board[i][j]);
+    N=board.size(), M=board[0].size();
+    memset(dp,0,sizeof(dp));
+    
+    int ans=0;
+    for(int i=0;i<N;i++) dp[i][0]=board[i][0], ans=max(ans,dp[i][0]);
+    for(int i=0;i<M;i++) dp[0][i]=board[0][i], ans=max(ans,dp[0][i]);
+    
+    for(int i=1;i<N;i++){
+        for(int j=1;j<M;j++){
+            if(board[i][j]==1) {
+                // if(i==1&&j==1){
+                //     cout<<dp[i-1][j-1]<<endl;
+                // }
+                dp[i][j]=min(dp[i-1][j],dp[i][j-1]);
+                dp[i][j]=min(dp[i][j],dp[i-1][j-1]);
+                dp[i][j]+=board[i][j];
+                ans=max(ans,dp[i][j]);
             }
+            
+            // cout<<dp[i][j]<<" ";
         }
+        // cout<<endl;
     }
+    
 
-    return answer * answer;
+    return ans*ans;
 }
