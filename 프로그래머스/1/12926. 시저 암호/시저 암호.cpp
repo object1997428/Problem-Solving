@@ -10,8 +10,6 @@ typedef pair<int,int> pii;
 typedef long long ll;
 
 
-
-
 string solution(string s, int n) {
     
     string answer = "";
@@ -27,7 +25,6 @@ string solution(string s, int n) {
         answer+=c;
     }
     
-    
-    
+
     return answer;
 }
