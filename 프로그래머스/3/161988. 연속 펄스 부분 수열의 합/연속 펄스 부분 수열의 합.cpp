@@ -35,9 +35,8 @@ long long solution(vector<int> _sequence) {
     memset(dp,-1,sizeof(dp));
     N=sequence.size();
     
-    ll ret1=solve(0,1);
-    ll ret2=solve(0,0);
-    // cout<<"ret1: "<<ret1<<" ret2: "<<ret2<<endl;
+    solve(0,1);
+    solve(0,0);
     
     ll ans=0;
     for(int i=0;i<N;i++){
