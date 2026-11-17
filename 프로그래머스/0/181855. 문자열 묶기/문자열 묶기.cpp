@@ -5,7 +5,7 @@
 #include <algorithm>
 using namespace std;
 
-int cnt[1000001];
+int cnt[31];
 
 int solution(vector<string> strArr) {
     
